@@ -1,0 +1,100 @@
+function logWork(name, worklog, worker) {
+  const jiraBaseUrl = 'https://jira.nexign.com';
+  const tempoAPIVersion = '4';
+  const worklogsEndpoint = `/rest/tempo-timesheets/${tempoAPIVersion}/worklogs`;
+
+  const timeSpentMinutes = 5; // 5 минут трудозатрат.
+
+  const originTaskId = document.getElementById('key-val').rel; // Получаем ID текущей таски.
+
+  if (!originTaskId) {
+    console.error('Не удалось получить ID текущей таски.');
+    return;
+  }
+
+  const worklogData = {
+    attributes: {},
+    billableSeconds: "",
+    worker: worker, // Имя пользователя (worker) из функции getMyself.
+    comment: "Списание трудозатрат за ${name}",
+    started: "2023-07-20", // Здесь может быть текущая дата или другое значение даты, которое вы хотите указать.
+    timeSpentSeconds: timeSpentMinutes * 60,
+    originTaskId: originTaskId,
+    remainingEstimate: null,
+    endDate: null,
+    includeNonWorkingDays: false
+  };
+
+  const request = new XMLHttpRequest();
+  request.open('POST', jiraBaseUrl + worklogsEndpoint, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+
+  request.onreadystatechange = function () {
+    if (request.readyState === XMLHttpRequest.DONE) {
+      if (request.status === 200) {
+        console.log('Трудозатраты списаны успешно.');
+        console.log(request.responseText);
+      } else {
+        console.error('Ошибка при списании трудозатрат.');
+        console.error('Status:', request.status);
+        console.error('Response:', request.responseText);
+      }
+    }
+  };
+
+  request.send(JSON.stringify(worklogData));
+}
+
+function getMyself(name, worklog) {
+  const jiraBaseUrl = 'https://jira.nexign.com';
+  const myselfEndpoint = '/rest/api/2/myself';
+
+  const request = new XMLHttpRequest();
+  request.open('GET', jiraBaseUrl + myselfEndpoint, true);
+  request.setRequestHeader('Content-Type', 'application/json');
+
+  request.onreadystatechange = function () {
+    if (request.readyState === XMLHttpRequest.DONE) {
+      if (request.status === 200) {
+        const response = JSON.parse(request.responseText);
+        console.log(response);
+        const worker = response.key; // нужно поле key
+        // После получения имени пользователя (worker) выполняем запрос на списание трудозатрат.
+        logWork(name, worklog, worker);
+      } else {
+        console.error('Ошибка при получении информации о текущем пользователе.');
+        console.error('Status:', request.status);
+        console.error('Response:', request.responseText);
+      }
+    }
+  };
+
+  request.send();
+}
+
+function addButton(name, worklog) {
+  const assignIssueButton = document.createElement("button");
+  assignIssueButton.setAttribute("id", "${name}_button");
+  assignIssueButton.setAttribute("title", "Отметить ТЗ за ${name}");
+  assignIssueButton.setAttribute("class", "aui-button toolbar-trigger resolved");
+
+  const spanLabel = document.createElement("span");
+  spanLabel.setAttribute("class", "trigger-label");
+  spanLabel.innerText = name;
+
+  assignIssueButton.appendChild(spanLabel);
+
+  const opsbarTransitions = document.getElementById("opsbar-opsbar-transitions");
+  if (opsbarTransitions) {
+    opsbarTransitions.appendChild(assignIssueButton);
+  }
+
+  // Добавляем обработчик события при клике на кнопку "name".
+  assignIssueButton.addEventListener("click", function () {
+    // Здесь добавьте код, чтобы списать трудозатраты.
+    getMyself(name, worklog);
+    location.reload();
+  });
+}
+
+addButton("НК", 5);

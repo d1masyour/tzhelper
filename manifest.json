@@ -1,0 +1,13 @@
+{
+    "manifest_version": 2,
+    "name": "Jira Helper Extension",
+    "version": "1.0",
+    "description": "Добавляет кнопку НК и обработчик для Jira.",
+    "content_scripts": [
+      {
+        "matches": ["*://jira.nexign.com/*"],
+        "js": ["helper.js"]
+      }
+    ]
+  }
+  
