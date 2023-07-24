@@ -1,4 +1,3 @@
-// Функция списания ТЗ
 function logWork(worker, timeSpentMinutes, originTaskId, buttonLabel) {
   const jiraBaseUrl = 'https://jira.nexign.com';
   const tempoAPIVersion = '4';
@@ -11,37 +10,54 @@ function logWork(worker, timeSpentMinutes, originTaskId, buttonLabel) {
 
   const started = new Date().toISOString().split('T')[0]; // Получаем сегодняшнюю дату в формате 'YYYY-MM-DD'.
   const comment = "Списание трудозатрат за " + buttonLabel;
-  const worklogData = {
-    attributes: {},
-    billableSeconds: "",
-    worker: worker,
-    comment: comment,
-    started: started,
-    timeSpentSeconds: timeSpentMinutes * 60,
-    originTaskId: originTaskId,
-    remainingEstimate: null,
-    endDate: null,
-    includeNonWorkingDays: false
-  };
 
-  const request = new XMLHttpRequest();
-  request.open('POST', jiraBaseUrl + worklogsEndpoint, true);
-  request.setRequestHeader('Content-Type', 'application/json');
+  let localVarTz = 'tz_nk'; // Устанавливаем значение 'tz_nk' по умолчанию.
 
-  request.onreadystatechange = function () {
-    if (request.readyState === XMLHttpRequest.DONE) {
-      if (request.status === 200) {
-        console.log('Трудозатраты списаны успешно.');
-        console.log(request.responseText);
-      } else {
-        console.error('Ошибка при списании трудозатрат.');
-        console.error('Status:', request.status);
-        console.error('Response:', request.responseText);
+  if (buttonLabel === 'НК') {
+    localVarTz = 'tz_nk';
+  }
+  else if (buttonLabel === 'Координация') {
+    localVarTz = 'tz_koordinat';
+  }
+
+  // Получаем значение из кэша в зависимости от buttonLabel.
+  chrome.storage.local.get([localVarTz], function (result) {
+    const tz_Value = result[localVarTz];
+    console.log(`Значение ${localVarTz} из кэша:`, tz_Value);
+
+    // Создаем объект worklogData с учетом полученного значения tz_nk.
+    const worklogData = {
+      attributes: {},
+      billableSeconds: "",
+      worker: worker,
+      comment: comment,
+      started: started,
+      timeSpentSeconds: tz_Value * 60,
+      originTaskId: originTaskId,
+      remainingEstimate: null,
+      endDate: null,
+      includeNonWorkingDays: false
+    };
+
+    const request = new XMLHttpRequest();
+    request.open('POST', jiraBaseUrl + worklogsEndpoint, true);
+    request.setRequestHeader('Content-Type', 'application/json');
+
+    request.onreadystatechange = function () {
+      if (request.readyState === XMLHttpRequest.DONE) {
+        if (request.status === 200) {
+          console.log('Трудозатраты списаны успешно.');
+          console.log(request.responseText);
+        } else {
+          console.error('Ошибка при списании трудозатрат.');
+          console.error('Status:', request.status);
+          console.error('Response:', request.responseText);
+        }
       }
-    }
-  };
+    };
 
-  request.send(JSON.stringify(worklogData));
+    request.send(JSON.stringify(worklogData));
+  });
 }
 
 function getMyself(timeSpentMinutes, buttonLabel) {
@@ -97,7 +113,7 @@ function addButton(buttonLabel, timeSpentMinutes) {
 }
 
 // Пример вызова функции для создания кнопки "НК" со списанием 5 минут.
-addButton("НК", 5);
+addButton("НК");
 
 // Пример вызова функции для создания другой кнопки "Координация" со списанием 10 минут.
-addButton("Координация", 10);
+addButton("Координация");

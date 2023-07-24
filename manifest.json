@@ -1,15 +1,28 @@
 {
-  "manifest_version": 2,
-  "name": "Jira Helper Extension",
+  "manifest_version": 3,
+  "name": "JIRA Worklog Helper",
   "version": "1.0",
-  "description": "Добавляет кнопку НК и обработчик для Jira.",
+  "description": "JIRA Worklog Helper",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "src/img/favicon-16x16.png",
+      "32": "src/img/favicon-32x32.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/js/background.js"
+  },
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": [
         "*://jira.nexign.com/*"
       ],
       "js": [
-        "helper.js"
+        "src/js/helper.js"
       ]
     }
   ]

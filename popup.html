@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JIRA Worklog Helper</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="src/css/popup.css">
+</head>
+<body>
+  <div class="container">
+    <h3 class="header">JIRA Worklog Helper</h3>
+    <h4 class="sub-header">Управление расширением</h4>
+    <div class="form-group">
+      <label class="label" for="tz_nk">ТЗ за НК:</label>
+      <input class="input-field" type="number" id="tz_nk" step="1">
+    </div>
+    <div class="form-group">
+      <label class="label" for="tz_koordinat">ТЗ за Координацию:</label>
+      <input class="input-field" type="number" id="tz_koordinat" step="1">
+    </div>
+    <div id="message" class="message"></div>
+    <button class="save-button" id="saveButton">Сохранить</button>
+  </div>
+  <script src="src/js/popup.js"></script>
+</body>
+</html>
